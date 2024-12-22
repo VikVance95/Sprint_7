@@ -1,23 +1,47 @@
-import constants.RestApi;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.response.ValidatableResponse;
+import org.junit.Before;
 import org.junit.Test;
 
-import static constants.RestApi.*;
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import java.util.List;
 
-public class GetOrderListTest {
-    @Test
-    @DisplayName("Получение списка заказов")
-    @Description("Получение списка заказов, проверка наличия списка")
-    public void orderGetList() {
-        given().log().all()
-                .baseUri(RestApi.BASE_URL)
-                .get(ORDER_GET_LIST)
-                .then()
-                .assertThat().body("orders", notNullValue())
-                .and()
-                .statusCode(200);
+import static org.apache.http.HttpStatus.SC_OK;
+import static org.junit.Assert.*;
+
+public class OrderGetListTest {
+
+    private OrderClient orderClient;
+
+    @Before
+    public void setUp() {
+        orderClient = new OrderClient();
     }
+
+    @Test
+    @DisplayName("Получение непустого списка заказов")
+    @Description("Get-запрос к  /api/v1/orders")
+    public void orderListNotEmptyTest() {
+        ValidatableResponse response = orderClient.getOrderList();
+
+        int statusCode = response.extract().statusCode();
+        assertEquals(SC_OK, statusCode);
+
+        List<String> bodyAnswer = response.extract().path("orders");
+        assertFalse(bodyAnswer.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Получение списка заказов не null")
+    @Description("Get-запрос к  /api/v1/orders")
+    public void orderListNotNullTest() {
+        ValidatableResponse response = orderClient.getOrderList();
+
+        int statusCode = response.extract().statusCode();
+        assertEquals(SC_OK, statusCode);
+
+        List<String> bodyAnswer = response.extract().path("orders");
+        assertNotEquals(null, bodyAnswer);
+    }
+
 }
